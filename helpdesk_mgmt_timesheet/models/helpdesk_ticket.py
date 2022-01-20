@@ -54,7 +54,7 @@ class HelpdeskTicket(models.Model):
     @api.constrains('project_id')
     def _constrains_project_timesheets(self):
         for record in self:
-            record.timesheet_ids.update({
+            record.timesheet_ids.sudo().update({
                 'project_id': record.project_id.id
             })
 

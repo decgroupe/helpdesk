@@ -16,4 +16,6 @@ class HelpdeskTicket(models.Model):
 
     @api.onchange('project_id')
     def _onchange_project(self):
-        self.task_id = False
+        # Unset a task set by context only if projects mismatch
+        if self.task_id and self.task_id.project_id != self.project_id:
+            self.task_id = False

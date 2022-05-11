@@ -8,7 +8,12 @@
             <xpath expr="//button[@name='toggle_active']" position="before">
                 <button class="oe_stat_button" type="action"
                         icon="fa-file" name="%(ticket_action_from_project)d"
-                        context="{'search_default_task_id': id, 'default_task_id': id}">
+                        context="{
+                            'search_default_task_id': id,
+                            'default_task_id': id,
+                            'search_default_project_id': project_id,
+                            'default_project_id': project_id
+                        }">
                     <field string="Tickets" name="ticket_count" widget="statinfo"/>
                 </button>
             </xpath>

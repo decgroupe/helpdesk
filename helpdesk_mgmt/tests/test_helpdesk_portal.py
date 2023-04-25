@@ -42,6 +42,11 @@ class TestHelpdeskPortalBase(odoo.tests.HttpCase):
         self.portal_ticket = self._create_ticket(
             self.partner_portal, "portal-ticket-title"
         )
+        # Tickets stages
+        self.stage_cancelled = self.env.ref(
+            "helpdesk_mgmt.helpdesk_ticket_stage_cancelled"
+        )
+        self.stage_done = self.env.ref("helpdesk_mgmt.helpdesk_ticket_stage_done")
 
     def get_new_tickets(self, user):
         return self.env["helpdesk.ticket"].with_user(user).search([])
@@ -67,6 +72,21 @@ class TestHelpdeskPortalBase(odoo.tests.HttpCase):
         }
         data.update(**values)
         resp = self.url_open("/submitted/ticket", data=data, files=files)
+        self.assertEqual(resp.status_code, 200)
+
+    def _close_ticket(self, ticket_id, cancel):
+        if cancel:
+            stage_id = self.stage_cancelled
+        else:
+            stage_id = self.stage_done
+        resp = self.url_open(
+            "/close/ticket",
+            data={
+                "ticket_id": ticket_id.id,
+                "stage_id": stage_id.id,
+                "csrf_token": http.WebRequest.csrf_token(self),
+            },
+        )
         self.assertEqual(resp.status_code, 200)
 
 
@@ -124,3 +144,15 @@ class TestHelpdeskPortal(TestHelpdeskPortalBase):
         # check that both files are public (access_token is set)
         self.assertTrue(attachment_ids[0].access_token)
         self.assertTrue(attachment_ids[1].access_token)
+
+    def test_portal_user_close_ticket_01(self):
+        self.authenticate("test-portal", "test-portal")
+        self.assertTrue(self.stage_done.portal_user_can_close)
+        self._close_ticket(self.portal_ticket, cancel=False)
+        self.assertEqual(self.portal_ticket.stage_id, self.stage_done)
+
+    def test_portal_user_close_ticket_02(self):
+        self.authenticate("test-portal", "test-portal")
+        self.assertTrue(self.stage_cancelled.portal_user_can_close)
+        self._close_ticket(self.portal_ticket, cancel=True)
+        self.assertEqual(self.portal_ticket.stage_id, self.stage_cancelled)

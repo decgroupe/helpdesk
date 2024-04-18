@@ -14,8 +14,8 @@
             <field name="model_id" ref="helpdesk_mgmt.model_helpdesk_ticket" />
             <field name="email_from">${object.company_id.partner_id.email}</field>
             <field
-                name="email_cc"
-            >${not object.partner_id and object.partner_email or ''|safe},</field>
+                name="email_to"
+            >${not object.partner_id and object.partner_email or ''|safe}</field>
             <field name="subject">The ticket ${object.number} has been closed.</field>
             <field name="partner_to">${object.partner_id.id}</field>
             <field name="auto_delete" eval="False" />
@@ -81,8 +81,8 @@
             <field name="model_id" ref="helpdesk_mgmt.model_helpdesk_ticket" />
             <field name="email_from">${object.company_id.partner_id.email}</field>
             <field
-                name="email_cc"
-            >${not object.partner_id and object.partner_email or ''|safe},</field>
+                name="email_to"
+            >${not object.partner_id and object.partner_email or ''|safe}</field>
             <field name="subject">The ticket ${object.number} stage has changed.</field>
             <field name="partner_to">${object.partner_id.id}</field>
             <field name="auto_delete" eval="False" />
@@ -141,6 +141,30 @@
                 </table>
                 </body>
                 </html>
+            ]]>
+            </field>
+        </record>
+        <record id="created_ticket_template" model="mail.template">
+            <field name="name">Helpdesk Created Ticket Notification Email</field>
+            <field name="model_id" ref="helpdesk_mgmt.model_helpdesk_ticket" />
+            <field name="email_from">${object.company_id.partner_id.email}</field>
+            <field
+                name="email_to"
+            >${('' if object.partner_id.email and object.partner_id.email == object.partner_email else object.partner_email) | safe}</field>
+            <field name="subject">The ticket ${object.number} has been created.</field>
+            <field
+                name="partner_to"
+            >${object.partner_id.id if object.partner_id.email and object.partner_id.email == object.partner_email else False}</field>
+            <field name="auto_delete" eval="False" />
+            <field name="lang">${object.partner_id.lang}</field>
+            <field
+                name="body_html"
+            ><![CDATA[<html>
+                <div>
+                    <p>Hello ${object.partner_id.name or object.partner_name or ''},</p>
+                    <p>The ticket "${object.display_name or 'n/a'}" has been created.</p>
+                    <p>You can reply to this email to add information to the ticket.</p>
+                </div>
             ]]>
             </field>
         </record>

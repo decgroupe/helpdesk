@@ -86,6 +86,7 @@
                             <field name="show_in_portal" />
                         </group>
                         <group name="right">
+                            <field name="category_ids" widget="many2many_tags" />
                         </group>
                     </group>
                     <notebook>

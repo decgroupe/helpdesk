@@ -160,7 +160,14 @@ class HelpdeskTicket(models.Model):
             updated_values, default_subtype_ids
         )
         if updated_values.get("partner_id"):
-            result.append((self.partner_id.id, default_subtype_ids, False))
+            # exclude internal subtypes
+            domain = [
+                ("id", "in", default_subtype_ids),
+                ("internal", "=", False),
+            ]
+            partner_subtype_ids = self.env["mail.message.subtype"].search(domain)
+            if partner_subtype_ids:
+                result.append((self.partner_id.id, partner_subtype_ids.ids, False))
         return result
 
     @api.model_create_multi

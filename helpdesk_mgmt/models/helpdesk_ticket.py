@@ -222,6 +222,14 @@ class HelpdeskTicket(models.Model):
         category = self.env["helpdesk.ticket.category"].browse(values["category_id"])
         if category.default_team_id:
             return category.default_team_id.id
+        # alternatively, try to find a team from its own category collection
+        if category:
+            team_ids = self.env["helpdesk.ticket.team"].search(
+                [("category_ids", "in", category.ids)]
+            )
+            # return a value only if there is one and only one match
+            if len(team_ids) == 1:
+                return team_ids[0].id
 
     # ---------------------------------------------------
     # Mail gateway
